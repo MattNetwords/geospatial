@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Google Maps with CSV Data</title>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCw_PNgHDWoJ7In7PWcW4yp1IjuLefGlMU"></script>
+  <style>
+    #map {
+      height: 500px;
+      width: 100%;
+    }
+    #csvInput {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Upload CSV to Display Coordinates</h2>
+  <input type="file" id="csvInput" accept=".csv" />
+  <div id="map"></div>
+  
+  <script>
+    let map;
+
+    function initMap() {
+      map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: -26.204389, lng: 28.040029 }, // Centered around South Africa
+        zoom: 7
+      });
+    }
+
+    function addMarkers(locations) {
+      locations.forEach(location => {
+        new google.maps.Marker({
+          position: { lat: location.lat, lng: location.lng },
+          map: map
+        });
+        console.log('Marker added:', location);
+      });
+    }
+
+    function parseCSV(data) {
+      const lines = data.split('\n');
+      const locations = [];
+
+      // Assuming the first line is the header
+      lines.slice(1).forEach(line => {
+        const [lat, lng] = line.split(',').map(coord => parseFloat(coord.trim()));
+        if (!isNaN(lat) && !isNaN(lng)) {
+          locations.push({ lat, lng });
+        }
+      });
+
+      return locations;
+    }
+
+    document.getElementById('csvInput').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const csvData = event.target.result;
+          const locations = parseCSV(csvData);
+          addMarkers(locations);
+        };
+        reader.readAsText(file);
+      }
+    });
+
+    window.onload = initMap;
+  </script>
+</body>
+</html>
